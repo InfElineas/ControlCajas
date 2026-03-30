@@ -36,32 +36,20 @@ export async function POST(request: NextRequest) {
       nombre,
       contrasena: hashedPassword,
       rol,
+      habilitado: false,
     });
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
       usuario: {
         id: resultado.insertedId.toString(),
         nombre,
         rol,
+        habilitado: false,
       },
+      message:
+        "Usuario registrado correctamente. Tu cuenta debe ser autorizada por un administrador antes de iniciar sesión.",
     });
-
-    response.cookies.set(
-      "usuario",
-      JSON.stringify({
-        id: resultado.insertedId.toString(),
-        nombre,
-        rol,
-      }),
-      {
-        httpOnly: true,
-        maxAge: 86400,
-        path: "/",
-      },
-    );
-
-    return response;
   } catch (error) {
     console.error("Registro error:", error);
     return NextResponse.json(
