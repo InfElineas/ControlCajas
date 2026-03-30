@@ -15,6 +15,16 @@ export default function Registro() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const parseResponseData = async (response: Response) => {
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      return response.json();
+    }
+    const text = await response.text();
+    return { error: text || "Error inesperado del servidor" };
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -30,6 +40,7 @@ export default function Registro() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
 
     if (formData.contrasena.length < 6) {
       setError("La contraseña debe tener al menos 6 caracteres");
@@ -44,10 +55,16 @@ export default function Registro() {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const data = await parseResponseData(response);
 
       if (response.ok) {
-        router.push("/dashboard");
+        setSuccess(
+          data.message ||
+            "Registro completado. Espera la autorización de un administrador para iniciar sesión.",
+        );
+        setTimeout(() => {
+          router.push("/");
+        }, 2500);
       } else {
         setError(data.error || "Error en el registro");
       }
@@ -124,6 +141,12 @@ export default function Registro() {
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded">
               {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded">
+              {success}
             </div>
           )}
 

@@ -13,6 +13,15 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const parseResponseData = async (response: Response) => {
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      return response.json();
+    }
+    const text = await response.text();
+    return { error: text || "Error inesperado del servidor" };
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -33,7 +42,7 @@ export default function Home() {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const data = await parseResponseData(response);
 
       if (response.ok) {
         router.push("/dashboard");
