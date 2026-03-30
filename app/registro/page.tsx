@@ -17,6 +17,15 @@ export default function Registro() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const parseResponseData = async (response: Response) => {
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      return response.json();
+    }
+    const text = await response.text();
+    return { error: text || "Error inesperado del servidor" };
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -46,7 +55,7 @@ export default function Registro() {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const data = await parseResponseData(response);
 
       if (response.ok) {
         setSuccess(
